@@ -1,0 +1,175 @@
+//The following code is the same as the previous main with deletes for the Node LL
+//Am unable to identify why the deletes on lines 110, 111, etc. are not working.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include "parse.h"
+#include "hashmap.cpp"
+
+int output(Node &ptr, HT &tab);
+Node head('c');
+
+int evaluate(int num1, int num2, const char* op){
+    if(Node::compString(op, (char*) "+")){
+        return num1 + num2;
+    } else if(Node::compString(op, (char*) "-")){
+        return num1 - num2;
+    } else if(Node::compString(op, (char*) "*")){
+        return num1 * num2;
+    } else if(Node::compString(op, (char*) "/")){
+        return num1/num2;
+    } else if(Node::compString(op, (char*) "%")){
+        return num1%num2;
+    } else if(Node::compString(op, (char*) "&&")){
+        return num1&&num2;
+    } else if(Node::compString(op, (char*) "||")){
+        return num1||num2;
+    } else if(Node::compString(op, (char*) "<")){
+        return num1 < num2;
+    } else if(Node::compString(op, (char*) ">")){
+        return num1 > num2;
+    } else if(Node::compString(op, (char*) "==")){
+        return num1 == num2;
+    } else if(Node::compString(op, (char*) "!=")){
+        return num1 != num2;
+    } else if(Node::compString(op, (char*) "<=")){
+        return num1 <= num2;
+    } else if(Node::compString(op, (char*) ">=")){
+        return num1 >= num2;
+    } else if(Node::compString(op, (char*) "!")){
+        return !num1;
+    } else if(Node::compString(op, (char*) "~")){
+        return -num1;
+    }
+    return 0;
+}
+
+void text(const char* string){
+    printf("%s", string);
+}
+
+void var(HT &tab){
+    read_next_token();
+    const char* variable = next_token();
+    char* var = Node::strcpy(variable);
+
+    int value = output(head, tab);
+    tab.insert(var, value);
+}
+
+void set(HT &tab){
+    read_next_token();
+    const char* variable = next_token();
+    Node* changeNode = tab.getNode(variable);
+
+    int value = output(head, tab);
+    changeNode->setIntVal(value);
+}
+
+int output(Node &ptr, HT &tab){
+    if(ptr.getIsHead()){
+        Node val = HT::makeNode(ptr, tab);
+        return output(val, tab);
+    }
+
+    else if(!(ptr.getIsNum())){
+        Node op = HT::makeNode(ptr, tab);
+        return output(op, tab);
+    }
+
+    else if(ptr.getIsNum()){
+        if((ptr.getPre())->getIsHead()){
+            int val = ptr.getValInt();
+            delete &ptr;
+            return val;
+        }
+
+        else if(!((ptr.getPre())->getIsNum())){
+            if(Node::compString((ptr.getPre())->getVal(), "!") || Node::compString((ptr.getPre())->getVal(), "~")){
+                int equation = evaluate(ptr.getValInt(), 0, (ptr.getPre())->getVal());
+                Node* equ = new Node(equation);
+                equ->setPre(*(ptr.getPre())->getPre());
+
+                delete ptr.getPre();
+                delete &ptr;
+
+                return output(*equ, tab);
+            } else {
+                Node val = HT::makeNode(ptr, tab);
+                return output(val, tab);
+            }
+        }
+    
+        else if((ptr.getPre())->getIsNum()){
+            int equation = evaluate((ptr.getPre())->getValInt(), ptr.getValInt(), ((ptr.getPre())->getPre())->getVal());
+            
+            Node* equ = new Node(equation);
+            equ->setPre(*((ptr.getPre())->getPre())->getPre());
+
+            delete (ptr.getPre())->getPre();
+            delete ptr.getPre();
+            delete &ptr;
+
+            return output(*equ, tab);
+        }
+    }
+    return 0;
+}
+
+void execute(const char* command, HT &tab){
+    if(Node::compString(command, (char*) "//")){
+        skip_line();
+    }
+    else if(Node::compString(command, (char*) "text")){
+        read_next_token();
+        const char* val = next_token();
+        text(val);
+    }
+    else if(Node::compString(command, (char*) "output")){
+        int value = output(head, tab);
+        printf("%d", value);
+    } else if(Node::compString(command, (char*) "var")){
+        var(tab);
+    } else if(Node::compString(command, (char*) "set")){
+        set(tab);
+    }
+}
+
+int main2(){
+    HT table(10);
+    set_input("test1.blip");
+    read_next_token();
+    while(next_token_type != END){
+        const char* command = next_token();
+        execute(command, table);
+        read_next_token();
+    }
+
+    set_input("test2.blip");
+    read_next_token();
+    while(next_token_type != END){
+        const char* command = next_token();
+        execute(command, table);
+        read_next_token();
+    }
+
+      
+    set_input("test3.blip");
+    read_next_token();
+    while(next_token_type != END){
+        const char* command = next_token();
+        execute(command, table);
+        read_next_token();
+    }
+
+    set_input("test4.blip");
+    read_next_token();
+    while(next_token_type != END){
+        const char* command = next_token();
+        execute(command, table);
+        read_next_token();
+    }
+
+    return 0;
+}

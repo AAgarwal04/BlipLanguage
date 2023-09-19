@@ -1,0 +1,7 @@
+text "Hello World\n"
+text "the answer is "
+output + 42 38 //blah blah
+text \n
+var y 42
+var x + y 1
+set y + y 1
