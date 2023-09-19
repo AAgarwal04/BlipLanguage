@@ -1,5 +1,5 @@
-# BlipLanguage
-C++ Project that interprets Blip Programming Language
+# Blip Language Interpreter
+### C++ Project that interprets Blip Programming Language
 
 Syntax for Blip Programming Language:
 * **text** statements result in a text message being displayed on the screen. The text message can be either
